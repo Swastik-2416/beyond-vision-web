@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Beyond Vision — Touch. Feel. Discover.</title>
+  <meta name="description" content="Beyond Vision turns your iPhone camera and photos into live haptic sensations. Touch an object, feel it pulse, hear its name." />
+  <meta property="og:title" content="Beyond Vision — Touch. Feel. Discover." />
+  <meta property="og:description" content="An accessibility app that lets you feel the world with your fingertips." />
+  <meta name="theme-color" content="#0a0a0a" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --yellow: #f5c518;
+      --yellow-dim: #c9a010;
+      --bg: #0a0a0a;
+      --bg2: #111111;
+      --bg3: #181818;
+      --text: #f0f0f0;
+      --muted: #888;
+      --border: rgba(255,255,255,0.07);
+      --radius: 20px;
+      --font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ── NOISE GRAIN ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.4;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 48px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      background: rgba(10,10,10,0.6);
+      border-bottom: 1px solid var(--border);
+      transition: padding 0.3s ease;
+    }
+    nav.scrolled { padding: 14px 48px; }
+
+    .nav-logo {
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .nav-logo span {
+      width: 28px; height: 28px;
+      background: var(--yellow);
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      font-size: 14px;
+    }
+
+    .nav-links { display: flex; gap: 32px; list-style: none; }
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    .nav-cta {
+      background: var(--yellow);
+      color: #000;
+      padding: 9px 20px;
+      border-radius: 100px;
+      font-size: 0.875rem;
+      font-weight: 700;
+      text-decoration: none;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .nav-cta:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(245,197,24,0.35);
+    }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 24px 80px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-glow {
+      position: absolute;
+      width: 700px; height: 700px;
+      background: radial-gradient(circle, rgba(245,197,24,0.12) 0%, transparent 70%);
+      border-radius: 50%;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      animation: pulse-glow 4s ease-in-out infinite;
+    }
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+      50% { opacity: 0.6; transform: translate(-50%, -50%) scale(1.1); }
+    }
+
+    .hero h1 {
+      font-size: clamp(3rem, 8vw, 6.5rem);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1.0;
+      margin-bottom: 24px;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fade-up 0.7s ease forwards 0.35s;
+    }
+    .hero h1 em {
+      font-style: normal;
+      color: var(--yellow);
+    }
+
+    .hero-sub {
+      font-size: clamp(1rem, 2.5vw, 1.3rem);
+      color: var(--muted);
+      max-width: 540px;
+      margin: 0 auto 40px;
+      font-weight: 400;
+      line-height: 1.7;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fade-up 0.7s ease forwards 0.5s;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      justify-content: center;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fade-up 0.7s ease forwards 0.65s;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--yellow);
+      color: #000;
+      padding: 14px 28px;
+      border-radius: 100px;
+      font-size: 1rem;
+      font-weight: 700;
+      text-decoration: none;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px rgba(245,197,24,0.4);
+    }
+
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg3);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 14px 28px;
+      border-radius: 100px;
+      font-size: 1rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .btn-secondary:hover {
+      background: #222;
+      border-color: rgba(255,255,255,0.15);
+    }
+
+    .hero-scroll {
+      margin-top: 72px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      opacity: 0;
+      animation: fade-up 0.7s ease forwards 1s;
+    }
+    .hero-scroll span {
+      font-size: 0.75rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .scroll-line {
+      width: 1px;
+      height: 48px;
+      background: linear-gradient(to bottom, var(--yellow), transparent);
+      animation: scroll-pulse 2s ease-in-out infinite;
+    }
+    @keyframes scroll-pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    /* ── TAGLINE STRIP ── */
+    .strip {
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 20px 0;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+    .strip-inner {
+      display: inline-flex;
+      gap: 48px;
+      animation: marquee 20s linear infinite;
+    }
+    .strip-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .strip-dot { color: var(--yellow); font-size: 1.2rem; }
+    @keyframes marquee {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+
+    /* ── FEATURES ── */
+    section { padding: 120px 24px; }
+
+    .section-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--yellow);
+      margin-bottom: 16px;
+    }
+    .section-label::before {
+      content: '';
+      width: 20px; height: 2px;
+      background: var(--yellow);
+      border-radius: 2px;
+    }
+
+    .section-title {
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin-bottom: 16px;
+    }
+    .section-sub {
+      font-size: 1.05rem;
+      color: var(--muted);
+      max-width: 500px;
+      line-height: 1.7;
+    }
+
+    .features-grid {
+      max-width: 1100px;
+      margin: 72px auto 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .feature-card {
+      background: var(--bg2);
+      padding: 40px 36px;
+      transition: background 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+    .feature-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(245,197,24,0.04) 0%, transparent 60%);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .feature-card:hover { background: #161616; }
+    .feature-card:hover::after { opacity: 1; }
+
+    .feature-icon {
+      width: 52px; height: 52px;
+      background: rgba(245,197,24,0.1);
+      border: 1px solid rgba(245,197,24,0.2);
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+      transition: transform 0.3s;
+    }
+    .feature-card:hover .feature-icon { transform: scale(1.1) rotate(-3deg); }
+
+    .feature-card h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 10px;
+    }
+    .feature-card p {
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    /* ── HOW IT WORKS ── */
+    .how-section { background: var(--bg2); }
+    .how-section .inner {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .steps {
+      margin-top: 72px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 40px;
+    }
+
+    .step {
+      position: relative;
+      padding-top: 16px;
+    }
+    .step-num {
+      font-size: 4rem;
+      font-weight: 900;
+      letter-spacing: -0.05em;
+      color: rgba(245,197,24,0.12);
+      line-height: 1;
+      margin-bottom: 16px;
+      transition: color 0.3s;
+    }
+    .step:hover .step-num { color: rgba(245,197,24,0.3); }
+    .step h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: -0.02em;
+    }
+    .step p {
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+    .step-line {
+      position: absolute;
+      top: 8px; right: 0;
+      width: calc(100% - 20px);
+      height: 1px;
+      background: linear-gradient(to right, var(--yellow), transparent);
+      opacity: 0.2;
+    }
+
+    /* ── SUPPORT ── */
+    .support-section .inner {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .support-grid {
+      margin-top: 64px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+    }
+
+    .support-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px 28px;
+      transition: border-color 0.3s, transform 0.3s;
+    }
+    .support-card:hover {
+      border-color: rgba(245,197,24,0.3);
+      transform: translateY(-4px);
+    }
+    .support-card .icon {
+      font-size: 2rem;
+      margin-bottom: 16px;
+    }
+    .support-card h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .support-card p {
+      font-size: 0.875rem;
+      color: var(--muted);
+      line-height: 1.7;
+      margin-bottom: 16px;
+    }
+    .support-card a {
+      color: var(--yellow);
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: gap 0.2s;
+    }
+    .support-card a:hover { gap: 8px; }
+
+    /* ── FAQ ── */
+    .faq-section .inner {
+      max-width: 720px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .faq-list {
+      margin-top: 56px;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .faq-item {
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+    }
+    .faq-item:last-child { border-bottom: none; }
+    .faq-q {
+      width: 100%;
+      background: none;
+      border: none;
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 0.975rem;
+      font-weight: 600;
+      text-align: left;
+      padding: 22px 28px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      transition: background 0.2s;
+    }
+    .faq-q:hover { background: #161616; }
+    .faq-arrow {
+      font-size: 1.2rem;
+      color: var(--yellow);
+      transition: transform 0.3s ease;
+      flex-shrink: 0;
+    }
+    .faq-item.open .faq-arrow { transform: rotate(45deg); }
+    .faq-a {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease, padding 0.3s ease;
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.8;
+      padding: 0 28px;
+    }
+    .faq-item.open .faq-a {
+      max-height: 300px;
+      padding: 0 28px 22px;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 48px 24px;
+      text-align: center;
+    }
+    .footer-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+    .footer-logo {
+      font-size: 1.2rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+    .footer-logo em {
+      font-style: normal;
+      color: var(--yellow);
+    }
+    .footer-tagline {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    .footer-links {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .footer-links a {
+      color: var(--muted);
+      font-size: 0.85rem;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--text); }
+    .footer-copy {
+      font-size: 0.8rem;
+      color: #444;
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fade-up {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(32px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+    .reveal-delay-4 { transition-delay: 0.4s; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      nav { padding: 16px 20px; }
+      nav.scrolled { padding: 12px 20px; }
+      .nav-links { display: none; }
+      section { padding: 80px 20px; }
+      .hero { padding: 100px 20px 60px; }
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="#" class="nav-logo">
+    <span>👁</span>
+    Beyond Vision
+  </a>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#how">How it works</a></li>
+    <li><a href="#support">Support</a></li>
+    <li><a href="#faq">FAQ</a></li>
+  </ul>
+  <a href="https://apps.apple.com" class="nav-cta">Download</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-glow"></div>
+  <h1>Touch. Feel.<br /><em>Discover.</em></h1>
+  <p class="hero-sub">
+    Beyond Vision turns your iPhone camera and photos into live haptic sensations.
+    Glide your finger. Feel objects pulse. Hear their names.
+  </p>
+  <div class="hero-actions">
+    <a href="https://apps.apple.com" class="btn-primary">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+      App Store
+    </a>
+    <a href="#support" class="btn-secondary">Get Support →</a>
+  </div>
+  <div class="hero-scroll">
+    <div class="scroll-line"></div>
+    <span>Scroll</span>
+  </div>
+</section>
+
+<!-- STRIP -->
+<div class="strip">
+  <div class="strip-inner">
+    <span class="strip-item"><span class="strip-dot">◆</span> Haptic Feedback</span>
+    <span class="strip-item"><span class="strip-dot">◆</span> Object Detection</span>
+    <span class="strip-item"><span class="strip-dot">◆</span> Live Camera Scan</span>
+    <span class="strip-item"><span class="strip-dot">◆</span> Text to Speech</span>
+    <span class="strip-item"><span class="strip-dot">◆</span> On-Device AI</span>
+    <span class="strip-item"><span class="strip-dot">◆</span> Accessibility First</span>
+    <span class="strip-item"><span class="strip-dot">◆</span> CoreHaptics</span>
+    <span class="strip-item"><span class="strip-dot">◆</span> Vision Framework</span>
+    <!-- duplicate for seamless loop -->
+    <span class="strip-item"><span class="strip-dot">◆</span> Haptic Feedback</span>
+    <span class="strip-item"><span class="strip-dot">◆</span> Object Detection</span>
+    <span class="strip-item"><span class="strip-dot">◆</span> Live Camera Scan</span>
+    <span class="strip-item"><span class="strip-dot">◆</span> Text to Speech</span>
+    <span class="strip-item"><span class="strip-dot">◆</span> On-Device AI</span>
+    <span class="strip-item"><span class="strip-dot">◆</span> Accessibility First</span>
+    <span class="strip-item"><span class="strip-dot">◆</span> CoreHaptics</span>
+    <span class="strip-item"><span class="strip-dot">◆</span> Vision Framework</span>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section id="features">
+  <div style="max-width:1100px;margin:0 auto;">
+    <div class="reveal">
+      <div class="section-label">Features</div>
+      <h2 class="section-title">Everything you need<br />to feel the world</h2>
+      <p class="section-sub">A multi-sensory experience built entirely on native Apple frameworks — no internet required.</p>
+    </div>
+    <div class="features-grid reveal reveal-delay-1">
+      <div class="feature-card">
+        <div class="feature-icon">✋</div>
+        <h3>Tactile Explore Mode</h3>
+        <p>Import any photo and drag your finger freely. Objects become invisible haptic hotspots — stronger as you centre on them, fading at the edges.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📷</div>
+        <h3>Live Camera Scan</h3>
+        <p>Point your camera at the world and touch what's around you in real time. Detect objects, animals, text, and general areas of interest instantly.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔊</div>
+        <h3>Text-to-Speech</h3>
+        <p>The moment your finger contacts an object, its name is spoken aloud. Read signs, labels, and text by simply touching them on screen.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🧠</div>
+        <h3>Smart Vision Pipeline</h3>
+        <p>YOLO detection, animal recognition, saliency mapping, fine-grained classification, and OCR — all running on-device. No data leaves your phone.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🎛️</div>
+        <h3>Haptic Tuner</h3>
+        <p>Adjust vibration intensity and sharpness to match your personal sensitivity. Your experience, your feel.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">♿</div>
+        <h3>Accessibility First</h3>
+        <p>Designed for users who are blind or have low vision. No visual attention required — every interaction is driven by touch and audio.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how" class="how-section">
+  <div class="inner">
+    <div class="reveal">
+      <div class="section-label">How it works</div>
+      <h2 class="section-title">From camera frame<br />to fingertip feeling</h2>
+      <p class="section-sub">A real-time pipeline that translates vision into vibration in milliseconds.</p>
+    </div>
+    <div class="steps">
+      <div class="step reveal reveal-delay-1">
+        <div class="step-line"></div>
+        <div class="step-num">01</div>
+        <h3>Capture</h3>
+        <p>The camera streams live frames, or you load a photo from your library. Either way, the pipeline starts immediately.</p>
+      </div>
+      <div class="step reveal reveal-delay-2">
+        <div class="step-line"></div>
+        <div class="step-num">02</div>
+        <h3>Detect</h3>
+        <p>YOLO, Apple's animal recogniser, and saliency mapping run in parallel to find every object and point of interest in the frame.</p>
+      </div>
+      <div class="step reveal reveal-delay-3">
+        <div class="step-line"></div>
+        <div class="step-num">03</div>
+        <h3>Map</h3>
+        <p>Detected bounding boxes are mapped onto the screen as invisible haptic zones, precisely aligned with what the camera sees.</p>
+      </div>
+      <div class="step reveal reveal-delay-4">
+        <div class="step-line"></div>
+        <div class="step-num">04</div>
+        <h3>Feel</h3>
+        <p>Your touch distance from each object's centre modulates haptic intensity in real time. Find it, feel it pulse, hear its name.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SUPPORT -->
+<section id="support" class="support-section">
+  <div class="inner">
+    <div class="reveal" style="text-align:center;max-width:600px;margin:0 auto 64px;">
+      <div class="section-label">Support</div>
+      <h2 class="section-title">We're here to help</h2>
+      <p class="section-sub">Having trouble or have a question? Reach out through any of the channels below.</p>
+    </div>
+    <div class="support-grid">
+      <div class="support-card reveal reveal-delay-1">
+        <div class="icon">📧</div>
+        <h3>Email Support</h3>
+        <p>Send us a detailed message and we'll get back to you as soon as possible.</p>
+        <a href="mailto:swastikmandal.2416@gmail.com">swastikmandal.2416@gmail.com →</a>
+      </div>
+      <div class="support-card reveal reveal-delay-2">
+        <div class="icon">🐛</div>
+        <h3>Report a Bug</h3>
+        <p>Found something that isn't working right? Open an issue on GitHub with steps to reproduce.</p>
+        <a href="https://github.com/Swastik-2416/Beyond-Vision/issues" target="_blank">Open an issue →</a>
+      </div>
+      <div class="support-card reveal reveal-delay-3">
+        <div class="icon">💡</div>
+        <h3>Feature Requests</h3>
+        <p>Have an idea that would make Beyond Vision better? We'd love to hear it.</p>
+        <a href="https://github.com/Swastik-2416/Beyond-Vision/issues" target="_blank">Suggest a feature →</a>
+      </div>
+      <div class="support-card reveal reveal-delay-4">
+        <div class="icon">📖</div>
+        <h3>Source Code</h3>
+        <p>Beyond Vision is open source. Explore the codebase, contribute, or fork it for your own project.</p>
+        <a href="https://github.com/Swastik-2416/Beyond-Vision" target="_blank">View on GitHub →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq" class="faq-section">
+  <div class="inner">
+    <div class="reveal">
+      <div class="section-label">FAQ</div>
+      <h2 class="section-title">Common questions</h2>
+    </div>
+    <div class="faq-list reveal reveal-delay-1">
+      <div class="faq-item">
+        <button class="faq-q">Does Beyond Vision require an internet connection? <span class="faq-arrow">+</span></button>
+        <div class="faq-a">No. All AI processing — object detection, classification, OCR — runs entirely on-device using Apple's Vision and CoreML frameworks. Your camera feed and photos never leave your iPhone.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">Which devices are supported? <span class="faq-arrow">+</span></button>
+        <div class="faq-a">Beyond Vision requires a physical iPhone or iPad with a Taptic Engine and camera. It cannot run on a Simulator because CoreHaptics requires the real hardware haptic actuator.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">Why can't I feel any vibrations? <span class="faq-arrow">+</span></button>
+        <div class="faq-a">Make sure your device is not in Silent mode and that haptic feedback is enabled in iOS Settings → Sounds & Haptics. You can also increase the baseline intensity in the app's Haptic Tuner screen.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">How accurate is the object detection? <span class="faq-arrow">+</span></button>
+        <div class="faq-a">The app runs a multi-stage pipeline: YOLO for general objects, Apple's animal recogniser for animals, saliency mapping as a fallback, and fine-grained classification to refine labels (e.g. "golden retriever" instead of just "dog"). Accuracy depends on lighting and image clarity.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">Is the app free? <span class="faq-arrow">+</span></button>
+        <div class="faq-a">Yes — Beyond Vision is completely free with no in-app purchases or subscriptions.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">How do I reset the app to default settings? <span class="faq-arrow">+</span></button>
+        <div class="faq-a">Open the Settings tab inside the app and tap "Reset to Defaults." This will restore haptic intensity, sharpness, and all toggles to their original values.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">Beyond <em>Vision</em></div>
+    <div class="footer-tagline">Touch. Feel. Discover.</div>
+    <div class="footer-links">
+      <a href="#features">Features</a>
+      <a href="#how">How it works</a>
+      <a href="#support">Support</a>
+      <a href="#faq">FAQ</a>
+      <a href="https://github.com/Swastik-2416/Beyond-Vision" target="_blank">GitHub</a>
+      <a href="mailto:swastikmandal.2416@gmail.com">Contact</a>
+      <a href="privacy.html">Privacy Policy</a>
+      <a href="terms.html">Terms of Use</a>
+    </div>
+    <div class="footer-copy">© 2025 Beyond Vision. Built for the Apple Swift Student Challenge.</div>
+  </div>
+</footer>
+
+<script>
+  // Nav scroll state
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 40);
+  });
+
+  // Scroll reveal
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // FAQ accordion
+  document.querySelectorAll('.faq-q').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const item = btn.closest('.faq-item');
+      const isOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+      if (!isOpen) item.classList.add('open');
+    });
+  });
+</script>
+</body>
+</html>

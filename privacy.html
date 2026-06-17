@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy — Beyond Vision</title>
+  <meta name="theme-color" content="#0a0a0a" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --yellow: #f5c518;
+      --bg: #0a0a0a;
+      --bg2: #111111;
+      --text: #f0f0f0;
+      --muted: #888;
+      --border: rgba(255,255,255,0.07);
+      --font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: var(--font); line-height: 1.7; }
+
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 48px;
+      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      background: rgba(10,10,10,0.8);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo {
+      font-size: 1.05rem; font-weight: 700; letter-spacing: -0.02em;
+      color: var(--text); text-decoration: none;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .nav-logo span {
+      width: 28px; height: 28px; background: var(--yellow); border-radius: 8px;
+      display: grid; place-items: center; font-size: 14px;
+    }
+    .nav-back {
+      color: var(--muted); font-size: 0.875rem; font-weight: 500;
+      text-decoration: none; display: flex; align-items: center; gap: 6px;
+      transition: color 0.2s;
+    }
+    .nav-back:hover { color: var(--text); }
+
+    .page {
+      max-width: 740px; margin: 0 auto;
+      padding: 140px 24px 100px;
+    }
+
+    .page-label {
+      font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--yellow); margin-bottom: 12px;
+    }
+    h1 {
+      font-size: clamp(2rem, 5vw, 3rem); font-weight: 800;
+      letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 12px;
+    }
+    .meta {
+      font-size: 0.85rem; color: var(--muted); margin-bottom: 60px;
+      padding-bottom: 32px; border-bottom: 1px solid var(--border);
+    }
+
+    h2 {
+      font-size: 1.15rem; font-weight: 700; letter-spacing: -0.02em;
+      margin: 40px 0 12px; color: var(--text);
+    }
+    p { font-size: 0.95rem; color: #bbb; margin-bottom: 16px; }
+    ul { margin: 0 0 16px 20px; }
+    li { font-size: 0.95rem; color: #bbb; margin-bottom: 8px; line-height: 1.7; }
+    a { color: var(--yellow); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    footer {
+      text-align: center; padding: 32px 24px;
+      border-top: 1px solid var(--border);
+      font-size: 0.8rem; color: #444;
+    }
+    footer a { color: var(--muted); }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo"><span>👁</span> Beyond Vision</a>
+  <a href="index.html" class="nav-back">← Back to Home</a>
+</nav>
+
+<div class="page">
+  <div class="page-label">Legal</div>
+  <h1>Privacy Policy</h1>
+  <p class="meta">Last updated: June 17, 2025</p>
+
+  <h2>Overview</h2>
+  <p>Beyond Vision is designed with privacy at its core. The app processes everything on your device and does not collect, store, or transmit any personal data.</p>
+
+  <h2>Data We Do Not Collect</h2>
+  <p>Beyond Vision does not collect or transmit:</p>
+  <ul>
+    <li>Camera footage or photos</li>
+    <li>Device identifiers or usage analytics</li>
+    <li>Location data</li>
+    <li>Personal information of any kind</li>
+  </ul>
+
+  <h2>On-Device Processing</h2>
+  <p>All AI processing — object detection, image classification, saliency analysis, and OCR — is performed entirely on your iPhone or iPad using Apple's Vision and CoreML frameworks. No camera frames, images, or results are sent to any external server.</p>
+
+  <h2>Camera Access</h2>
+  <p>Beyond Vision requests access to your device's camera for the Live Mode feature. Camera data is processed locally in real time and is never stored or transmitted. You can revoke this permission at any time in iOS Settings → Privacy & Security → Camera.</p>
+
+  <h2>Photo Library Access</h2>
+  <p>The app requests access to your photo library only when you choose to import an image in Explore Mode. Selected photos are processed locally and are never uploaded or stored outside your device.</p>
+
+  <h2>Haptic & Settings Data</h2>
+  <p>Your Haptic Tuner preferences (intensity, sharpness, toggles) are stored locally on your device using standard iOS storage. This data never leaves your device.</p>
+
+  <h2>Children's Privacy</h2>
+  <p>Beyond Vision does not collect any data from any user, including children under 13. The app complies with the Children's Online Privacy Protection Act (COPPA).</p>
+
+  <h2>Third-Party Services</h2>
+  <p>Beyond Vision uses no third-party SDKs, analytics services, advertising networks, or crash-reporting services that collect user data.</p>
+
+  <h2>Changes to This Policy</h2>
+  <p>If this policy is updated, the revised version will be posted on this page with an updated date. Continued use of the app after changes constitutes acceptance of the revised policy.</p>
+
+  <h2>Contact</h2>
+  <p>If you have any questions about this Privacy Policy, please contact us at <a href="mailto:swastikmandal.2416@gmail.com">swastikmandal.2416@gmail.com</a>.</p>
+</div>
+
+<footer>
+  <a href="index.html">Beyond Vision</a> · <a href="terms.html">Terms of Use</a> · © 2025
+</footer>
+
+</body>
+</html>
